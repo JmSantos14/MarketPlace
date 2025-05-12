@@ -5,6 +5,7 @@ export const CartContext = createContext({});
 
 function CartProvider({children}){
     const [cart, setCart] = useState([]);
+    const [total, setTotal] = useState(0);
 
     function addItemCart(newItem){
         const indexItem = cart.findIndex(item => item.id === newItem.id)
@@ -17,7 +18,7 @@ function CartProvider({children}){
             cartList[indexItem].total = cartList[indexItem].amount * cartList[indexItem].price
 
             setCart(cartList)
-            console.log(cartList)
+            totalResultCart(cartList)
             return;
         }
 
@@ -27,7 +28,7 @@ function CartProvider({children}){
             total:newItem.price
         }
         setCart(products => [...products, data])
-        console.log([...cart, data])
+        totalResultCart([...cart, data])
     }
 
     function removeItemCart(product){
@@ -38,27 +39,37 @@ function CartProvider({children}){
             let cartList = cart;    
 
             // pega essa posicao da lista e diminui
-            cartList[indexItem].amount = cartList[indexItem].amount - 1
+            cartList[indexItem].amount = cartList[indexItem].amount - 1;
 
             // recalcula o preco total desse produto
-            cartList[indexItem].total = cartList[indexItem].amount - cartList[indexItem].price
+            cartList[indexItem].total = cartList[indexItem].total - cartList[indexItem].price
 
             setCart(cartList)
+            totalResultCart(cartList)
             return;
 
         }
-        // o filter vai retornar todos os itens e guardar nessa variavel
+        // o filter vai retornar todos os itens, menos o que foi reduzido e guardar nessa variavel
         const removeItem = cart.filter(item => item.id !== product.id)
         setCart(removeItem)
+        totalResultCart(removeItem)
+    }
 
+    function totalResultCart(items){
+        let myCart = items;
+        // reduce = resgatar cada total e somando eles 
+        let result = myCart.reduce((acc, obj) => {return acc + obj.total}, 0)
+        setTotal(result.toFixed(2));
     }
 
     return(
         <CartContext.Provider
             value={{
                 cart,
+                total,
                 addItemCart,
-                removeItemCart
+                removeItemCart,
+                totalResultCart
             }}
         >
             {children}
